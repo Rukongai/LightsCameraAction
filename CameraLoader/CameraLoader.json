@@ -6,5 +6,6 @@
     "RepoUrl": "https://github.com/NeNeppie/LightsCameraAction",
     "Tags": ["Utility", "UI", "Gpose", "Group pose", "Camera"],
     "CategoryTags": ["Utility", "UI"],
-    "InternalName": "CameraLoader"
+    "InternalName": "CameraLoader",
+    "IconUrl": "https://raw.githubusercontent.com/NeNeppie/LightsCameraAction/main/images/icon.png"
 }

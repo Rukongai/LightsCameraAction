@@ -31,8 +31,8 @@ public unsafe class LightingPreset : PresetBase
             var lightDrawObject = (LightObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
             if (lightDrawObject is null) { continue; }
 
-            var relativeObjectPos = mode == (int)PresetMode.CameraOrientation ? _camera->Position : Service.ClientState.LocalPlayer?.Position ?? new(0, 0, 0);
-            var relativeObjectRot = mode == (int)PresetMode.CameraOrientation ? _camera->HRotation - 1.5707f : Service.ClientState.LocalPlayer?.Rotation ?? 0f;
+            var relativeObjectPos = mode == (int)PresetMode.CameraOrientation ? _camera->Position : Service.ObjectTable.LocalPlayer?.Position ?? new(0, 0, 0);
+            var relativeObjectRot = mode == (int)PresetMode.CameraOrientation ? _camera->HRotation - 1.5707f : Service.ObjectTable.LocalPlayer?.Rotation ?? 0f;
 
             var relativePos = lightDrawObject->Position - relativeObjectPos;
             if (mode == (int)PresetMode.CharacterOrientation || mode == (int)PresetMode.CameraOrientation)
@@ -67,8 +67,8 @@ public unsafe class LightingPreset : PresetBase
 
             if (lightDrawObject is null) { continue; }
 
-            var relativeObjectPos = this.PositionMode == (int)PresetMode.CameraOrientation ? _camera->Position : Service.ClientState.LocalPlayer?.Position ?? new(0, 0, 0);
-            var relativeObjectRot = this.PositionMode == (int)PresetMode.CameraOrientation ? _camera->HRotation - 1.5707f : Service.ClientState.LocalPlayer?.Rotation ?? 0f;
+            var relativeObjectPos = this.PositionMode == (int)PresetMode.CameraOrientation ? _camera->Position : Service.ObjectTable.LocalPlayer?.Position ?? new(0, 0, 0);
+            var relativeObjectRot = this.PositionMode == (int)PresetMode.CameraOrientation ? _camera->HRotation - 1.5707f : Service.ObjectTable.LocalPlayer?.Rotation ?? 0f;
 
             var relativePos = this.Lights[i].RelativePos;
             if (this.PositionMode is ((int)PresetMode.CharacterOrientation) or ((int)PresetMode.CameraOrientation))

@@ -21,7 +21,7 @@ public unsafe class CameraPreset : PresetBase
 
         if (mode == (int)PresetMode.CharacterOrientation)
         {
-            var playerRot = Service.ClientState.LocalPlayer?.Rotation ?? 0f;
+            var playerRot = Service.ObjectTable.LocalPlayer?.Rotation ?? 0f;
             relativeRot = MathUtils.ConvertToRelative(cameraRot, playerRot);
         }
 
@@ -65,7 +65,7 @@ public unsafe class CameraPreset : PresetBase
         float hRotation = this.HRotation;
         if (this.PositionMode == (int)PresetMode.CharacterOrientation)
         {
-            var playerRot = Service.ClientState.LocalPlayer?.Rotation ?? 0f;
+            var playerRot = Service.ObjectTable.LocalPlayer?.Rotation ?? 0f;
             hRotation = MathUtils.ConvertFromRelative(this.HRotation, playerRot);
         }
 
