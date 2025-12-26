@@ -9,6 +9,8 @@ public class GPoseHooking : IDisposable
     public delegate void OnGPoseStateChangeDelegate(bool entered);
     public event OnGPoseStateChangeDelegate OnGPoseStateChangeEvent;
 
+    public bool IsGPosing { get; private set; } = false;
+
     public delegate bool EnterGPoseDelegate(IntPtr addr);
     private Hook<EnterGPoseDelegate> _enterGPoseHook = null;
 
@@ -31,14 +33,20 @@ public class GPoseHooking : IDisposable
     private bool EnterGPoseDetour(IntPtr addr)
     {
         var entered = this._enterGPoseHook!.Original.Invoke(addr);
-        OnGPoseStateChangeEvent.Invoke(entered);
+        IsGPosing = entered;
+        OnGPoseStateChangeEvent?.Invoke(entered);
         return entered;
     }
 
     private void ExitGPoseDetour(IntPtr addr)
     {
         this._exitGPoseHook!.Original.Invoke(addr);
-        OnGPoseStateChangeEvent.Invoke(false);
+        IsGPosing = false;
+
+        // Disable camera offset when exiting GPose
+        Service.CameraService.ApplyPositionOffset = false;
+
+        OnGPoseStateChangeEvent?.Invoke(false);
     }
 
     public void Dispose()

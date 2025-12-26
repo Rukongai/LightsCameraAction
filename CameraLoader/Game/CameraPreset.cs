@@ -1,4 +1,5 @@
 using CameraLoader.Utils;
+using System.Numerics;
 
 namespace CameraLoader.Game;
 
@@ -12,6 +13,7 @@ public unsafe class CameraPreset : PresetBase
     public float Pan { get; set; }
     public float Tilt { get; set; }
     public float Roll { get; set; }
+    public Vector3 RelativePosition { get; set; }
 
     public CameraPreset() { }
     public CameraPreset(string name, int mode = 0)
@@ -19,10 +21,21 @@ public unsafe class CameraPreset : PresetBase
         float cameraRot = _camera->HRotation;
         float relativeRot = cameraRot;
 
+        Vector3 cameraPos = _camera->Position;
+        Vector3 relativePos = Vector3.Zero;
+
         if (mode == (int)PresetMode.CharacterOrientation)
         {
-            var playerRot = Service.ObjectTable.LocalPlayer?.Rotation ?? 0f;
+            var player = Service.ObjectTable.LocalPlayer;
+            var playerRot = player?.Rotation ?? 0f;
+            var playerPos = player?.Position ?? Vector3.Zero;
+
             relativeRot = MathUtils.ConvertToRelative(cameraRot, playerRot);
+            relativePos = MathUtils.ConvertPositionToRelative(cameraPos, playerPos, playerRot);
+
+            var worldOffset = new Vector3(cameraPos.X - playerPos.X, cameraPos.Y - playerPos.Y, cameraPos.Z - playerPos.Z);
+            Service.PluginLog.Info($"[CameraPreset] Save - PlayerRot: {playerRot:F3} rad ({MathUtils.RadToDeg(playerRot):F1}°)");
+            Service.PluginLog.Info($"[CameraPreset] Save - WorldOffset: {worldOffset}, LocalOffset (saved): {relativePos}");
         }
 
         // First Person Mode
@@ -38,6 +51,7 @@ public unsafe class CameraPreset : PresetBase
         this.Pan = _camera->Pan;
         this.Tilt = _camera->Tilt;
         this.Roll = _camera->Roll;
+        this.RelativePosition = relativePos;
     }
 
     public bool IsValid()
@@ -63,10 +77,31 @@ public unsafe class CameraPreset : PresetBase
         if (!this.IsValid()) { return false; }
 
         float hRotation = this.HRotation;
+
+        // Set up position offset if in CharacterOrientation mode
         if (this.PositionMode == (int)PresetMode.CharacterOrientation)
         {
-            var playerRot = Service.ObjectTable.LocalPlayer?.Rotation ?? 0f;
+            var player = Service.ObjectTable.LocalPlayer;
+            var playerRot = player?.Rotation ?? 0f;
+
             hRotation = MathUtils.ConvertFromRelative(this.HRotation, playerRot);
+
+            // Set up the camera service to apply position offset
+            Service.CameraService.ActiveRelativeOffset = this.RelativePosition;
+            Service.CameraService.ApplyPositionOffset = true;
+
+            var playerPos = player?.Position ?? Vector3.Zero;
+            var worldOffset = MathUtils.RotateVectorHorizontal(this.RelativePosition, playerRot);
+            var expectedCameraPos = playerPos + worldOffset;
+            Service.PluginLog.Info($"[CameraPreset] Load - PlayerRot: {playerRot:F3} rad ({MathUtils.RadToDeg(playerRot):F1}°)");
+            Service.PluginLog.Info($"[CameraPreset] Load - LocalOffset (loaded): {this.RelativePosition}, WorldOffset: {worldOffset}");
+            Service.PluginLog.Info($"[CameraPreset] Load - PlayerPos: {playerPos}, Expected CamPos: {expectedCameraPos}");
+        }
+        else
+        {
+            // Disable position offset for non-character-relative presets
+            Service.CameraService.ApplyPositionOffset = false;
+            Service.PluginLog.Info($"[CameraPreset] Load - ApplyOffset: false (not CharacterOrientation mode)");
         }
 
         // First Person Mode

@@ -21,6 +21,7 @@ internal class Service
 
     public static GameFunctions GameFunctions { get; set; } = null!;
     public static GPoseHooking GPoseHooking { get; set; } = null!;
+    public static CameraService CameraService { get; set; } = null!;
     public static Configuration Config { get; set; } = null!;
 
     public static bool Initialize()
@@ -30,6 +31,7 @@ internal class Service
 
         GPoseHooking = new GPoseHooking();
         GameFunctions = new GameFunctions();
+        CameraService = new CameraService();
 
         if (Config.WindowOpenMode == WindowOpenMode.OnStartup)
         {
@@ -42,5 +44,6 @@ internal class Service
     {
         GPoseHooking.Dispose();
         GameFunctions.Dispose();
+        CameraService.Dispose();
     }
 }

@@ -1,14 +1,17 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace CameraLoader.Game.Structs;
 
-// Based off of https://github.com/Tenrys/ZoomTilt/tree/master/ZoomTilt/Structures , 
+// Based off of https://github.com/Tenrys/ZoomTilt/tree/master/ZoomTilt/Structures ,
 // which is in turn based off of... a zoom hack. Yeah.
-// The camera's position, among other parameters, cannot be externally edited. The game simply resets it to that of the client
+// The camera's position at 0x60 cannot be externally edited. The game simply resets it to that of the client.
+// To properly modify position, use Camera.CameraBase.SceneCamera.Object.Position
 [StructLayout(LayoutKind.Explicit)]
 public unsafe struct GameCamera
 {
+    [FieldOffset(0x00)] public Camera Camera;  // FFXIVClientStructs camera with proper SceneCamera access
     [FieldOffset(0x60)] public Vector3 Position;
     [FieldOffset(0x124)] public float Distance;     // default is 6
     [FieldOffset(0x128)] public float MinDistance;  // 1.5

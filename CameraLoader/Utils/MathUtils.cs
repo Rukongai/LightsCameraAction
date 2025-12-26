@@ -66,6 +66,54 @@ public static class MathUtils
         return angle;
     }
 
+    /// <summary>
+    /// Rotates a 3D vector around the Y axis (horizontal rotation in game coordinates)
+    /// </summary>
+    public static Vector3 RotateVectorHorizontal(Vector3 vector, float radians)
+    {
+        float sin = (float)Math.Sin(radians);
+        float cos = (float)Math.Cos(radians);
+
+        // Rotate around Y axis (game uses swapped X/Z coordinates)
+        return new Vector3(
+            (vector.X * cos) + (vector.Z * sin),
+            vector.Y, // Y stays the same for horizontal rotation
+            (vector.Z * cos) - (vector.X * sin)
+        );
+    }
+
+    /// <summary>
+    /// Converts a world-space position offset to a character-relative offset
+    /// </summary>
+    public static Vector3 ConvertPositionToRelative(Vector3 cameraPos, Vector3 characterPos, float characterRotation)
+    {
+        // Get the offset in world space
+        Vector3 worldOffset = new Vector3(
+            cameraPos.X - characterPos.X,
+            cameraPos.Y - characterPos.Y,
+            cameraPos.Z - characterPos.Z
+        );
+
+        // Rotate the offset by negative character rotation to get local space
+        return RotateVectorHorizontal(worldOffset, -characterRotation);
+    }
+
+    /// <summary>
+    /// Converts a character-relative offset to a world-space position
+    /// </summary>
+    public static Vector3 ConvertPositionFromRelative(Vector3 relativeOffset, Vector3 characterPos, float characterRotation)
+    {
+        // Rotate the local offset to world space
+        Vector3 worldOffset = RotateVectorHorizontal(relativeOffset, characterRotation);
+
+        // Add character position to get final world position
+        return new Vector3(
+            characterPos.X + worldOffset.X,
+            characterPos.Y + worldOffset.Y,
+            characterPos.Z + worldOffset.Z
+        );
+    }
+
     // Converting from values stored in DrawObjects to the ones displayed to the user
     public static Vector3 ConvertFloatsTo24BitColor(Vector3 color)
     {
